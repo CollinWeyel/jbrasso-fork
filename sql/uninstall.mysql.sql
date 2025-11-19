@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `#__jbrasso_oauth_tokens`;

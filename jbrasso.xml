@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="4.0" type="plugin" group="system" method="upgrade">
+	<name>JBRA_SSO-Fork 1.3</name>
+	<author>Giannis Brailas, Collin Weyel</author>
+	<creationDate>November 2025</creationDate>
+	<copyright>Copyright (C) 2025 Giannis Brailas, Collin Weyel. All rights reserved.</copyright>
+	<license>GNU Lesser General Public License v3.0 (LGPL-3.0); see LICENSE.md</license>
+	<authorEmail>jbrailas@rns-systems.eu,collin@weyel.dev</authorEmail>
+	<version>1.3</version>
+	<buildDate>Mi 19. Nov 08:31:38 CET 2025</buildDate>
+	<description>Oauth SSO Joomla 5 Plugin</description>
+	<files>
+		<filename plugin="jbrasso">jbrasso.php</filename>
+		<filename>index.html</filename>
+		<folder>sql</folder>
+	</files>
+	<install>
+		<sql>
+			<file driver="mysql">sql/install.mysql.sql</file>
+		</sql>
+	</install>
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.sql</file>
+		</sql>
+	</uninstall>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="app_name" type="text" label="App Name" />
+				<field name="app_scope" type="text" default="openid profile email" label="OIDC Scope" />
+				<field name="auth_url" type="text" label="Authorization URL" />
+				<field name="token_url" type="text" label="Token URL" />
+				<field name="api_url" type="text" label="User Info URL" />
+				<field name="client_id" type="text" label="Client ID" />
+				<field name="client_secret" type="password" label="Client Secret" />
+				<field name="logout_url" type="text" label="Logout URL" />
+				<field name="admin_sso" type="checkbox" label="Enable SSO on admin"
+					description="Click to enable sso on admin area" />
+				<field name="debug" type="checkbox" label="Enable Debug"
+					description="Click to enable php errorlog debug" />
+			</fieldset>
+		</fields>
+	</config>
+</extension>

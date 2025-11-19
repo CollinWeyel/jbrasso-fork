@@ -1,38 +1,23 @@
-# Jbra oauth sso plugin for Joomla 5!
+# A fork of jbra oauth sso plugin for Joomla 5
 
-**SSO oauth v2.0 plugin for Joomla! 5.x**
+This is an fork of jbrasso to make it working with Joomla 5.x.. Nothing fancy really.
 
-If you already know how to use jbrasso and you need it for a Joomla! project, than this is a library package to be used in Joomla! Easy to install and update.
+## Download
 
-Download
---------
+You can just download this repo as a zip file from the `<> Code` button above or click here [main.zip](https://github.com/CollinWeyel/jbrasso-fork/archive/refs/heads/main.zip).
 
-You can download the current version / older version of JbraSSO-Joomla-Library using the [JbraSSO-Joomla-Library download page](https://github.com/jbrailas/jbrasso/releases).
+## Installation
 
-Version
--------
+Just upload the previous downloaded zip file in the joomla extension manager.
 
-* The current Joomla! Library is using jbrasso 1.0.
+## Credits
 
-Usage
------
+Thanks to [Ioannis Brailas](https://github.com/jbrailas) for the original plugin.
 
-Documentation
--------------
+## License
 
-* [JbraSSO github page](https://github.com/jbrailas/jbrasso)
+JbraSSO-Fork is licensed under GNU Lesser General Public License v3.0 (LGPL-3.0) [LGPLv3](./LICENSE.md).
 
-Bugs? Problems? Feedback?
--------------------------
+## Notes
 
-If you are having problems with JbraSSO itself and you think is a bug or something, check the [JbraSSO Issue Tracker](https://github.com/jbrailas/jbrasso/issues)
-
-Credits
--------
-
-* Thanks to Dora, my wife.
-
-
-License
--------
-JbraSSO is licensed under [LGPL (GNU LESSER GENERAL PUBLIC LICENSE)](https://github.com/jbrailas/jbrasso/blob/master/license.md)
+I'm not saying that this code is perfect, but it works. The goal was just to get a MVP for basic authentication. I'm not a joomla or php developer. Improvements are welcome.
