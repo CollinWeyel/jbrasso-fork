@@ -10,6 +10,10 @@ You can just download this repo as a zip file from the `<> Code` button above or
 
 Just upload the previous downloaded zip file in the joomla extension manager.
 
+## Usage
+
+Just configure the listed parameters in the plugin configuration and set the access level to `Public`. Then everything should work.
+
 ## Credits
 
 Thanks to [Ioannis Brailas](https://github.com/jbrailas) for the original plugin.
