@@ -601,7 +601,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		if (!empty($userInfo)) {
 			// If user doesn't exist, create a new Joomla user
 			$user = new User();
-			$user->email = $userInfo['mail'];
+			$user->email = $userInfo['email'];
 			$user->name = $userInfo['surname'] . " " . $userInfo['givenName'];
 			$user->username = $userInfo['userPrincipalName'];
 			$user->lastvisitDate = date("Y-m-d H:i:s");
