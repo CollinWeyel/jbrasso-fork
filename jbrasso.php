@@ -738,15 +738,26 @@ class PlgSystemJbraSso extends CMSPlugin
 			'lastvisitDate' => Factory::getDate()->toSql()
 		];
 
-		if (!$user->bind($data)) {
-			$app->enqueueMessage('Failed to bind updated user data: ' . $user->getError(), 'error');
-			Log::add(
-				'jbrasso: Failed to bind updated user data: ' . $user->getError(),
-				Log::DEBUG,
-				'jbrasso_log'
-			);
-			return;
+		// if (!$user->bind($data)) {
+		// 	$app->enqueueMessage('Failed to bind updated user data: ' . $user->getError(), 'error');
+		// 	Log::add(
+		// 		'jbrasso: Failed to bind updated user data: ' . $user->getError(),
+		// 		Log::DEBUG,
+		// 		'jbrasso_log'
+		// 	);
+		// 	return;
+		// }
+
+		$name = trim($user_info['surname'] . " " . $user_info['givenName']);
+
+		if ($name == "") {
+			$name = $user->name;
 		}
+
+		$user->name = $name;
+		$user->username = $user_info['userPrincipalName'];
+		$user->email = $user_info['email'];
+		$user->lastvisitDate = Factory::getDate()->toSql();
 
 		if (!$user->save()) {
 			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
