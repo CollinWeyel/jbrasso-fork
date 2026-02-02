@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="4.0" type="plugin" group="system" method="upgrade">
-	<name>JBRA_SSO-Fork 1.3</name>
+	<name>JBRA_SSO-Fork 1.6</name>
 	<author>Giannis Brailas, Collin Weyel</author>
-	<creationDate>November 2025</creationDate>
+	<creationDate>January 2026</creationDate>
 	<copyright>Copyright (C) 2025 Giannis Brailas, Collin Weyel. All rights reserved.</copyright>
 	<license>GNU Lesser General Public License v3.0 (LGPL-3.0); see LICENSE.md</license>
 	<authorEmail>jbrailas@rns-systems.eu,collin@weyel.dev</authorEmail>
-	<version>1.3</version>
-	<buildDate>Mi 19. Nov 08:31:38 CET 2025</buildDate>
+	<version>1.6</version>
+	<buildDate>Mo 2. Feb 10:32:10 CET 2026</buildDate>
 	<description>Oauth SSO Joomla 5 Plugin</description>
 	<files>
 		<filename plugin="jbrasso">jbrasso.php</filename>
@@ -35,8 +35,13 @@
 				<field name="client_id" type="text" label="Client ID" />
 				<field name="client_secret" type="password" label="Client Secret" />
 				<field name="logout_url" type="text" label="Logout URL" />
+				<field name="acceptable_domains" type="text" label="Acceptable Domains" />
+				<field name="frontend_sso" type="checkbox" label="Enable SSO on frontend"
+					description="Click to enable sso on frontend. If it is not checked, use a button with link" />
 				<field name="admin_sso" type="checkbox" label="Enable SSO on admin"
 					description="Click to enable sso on admin area" />
+				<field name="create_user" type="checkbox" label="Enable to auto-create users"
+					description="Click to enable to auto-create users. Deny access if user not found." />
 				<field name="debug" type="checkbox" label="Enable Debug"
 					description="Click to enable php errorlog debug" />
 			</fieldset>
