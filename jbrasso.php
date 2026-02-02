@@ -715,6 +715,19 @@ class PlgSystemJbraSso extends CMSPlugin
 			);
 		}
 
+		if (empty($user_info)) {
+			if ($this->debug) {
+				error_log('user_info is empty\n');
+				Log::add(
+					'jbrasso: user_info is empty',
+					Log::DEBUG,
+					'jbrasso_log'
+				);
+			}
+
+			return $user;
+		}
+
 		// Update data with wich we created the user
 		$data = [
 			'name'     => $user_info['surname'] . " " . $user_info['givenName'],
