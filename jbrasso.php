@@ -454,7 +454,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		}
 
 		// Validate state parameter
-		if ((empty($state) || empty($storedState) || strcmp($state, $storedState) !== 0)) {
+		if (empty($state) || empty($stored_state) || strcmp($state, $stored_state) !== 0) {
 			if ($this->debug) {
 				error_log("Invalid state. Got: $state, Expected: $stored_state");
 				Log::add("Invalid state. Got: $state, Expected: $stored_state", Log::DEBUG, 'jbrasso_log');
@@ -469,7 +469,7 @@ class PlgSystemJbraSso extends CMSPlugin
 				$session->set("oauth2.retry.$client_key", true);
 
 				// Only retry with NON-EMPTY existing state
-				if (!empty($storedState)) {
+				if (!empty($stored_state)) {
 					if ($this->debug) {
 						error_log("Redirect with existing state");
 						Log::add("jbrasso: Redirect with existing state", Log::DEBUG, 'jbrasso_log');
