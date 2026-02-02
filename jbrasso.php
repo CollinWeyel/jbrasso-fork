@@ -457,6 +457,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		if ((empty($state) || empty($storedState) || $state !== $storedState)) {
 			if ($this->debug) {
 				error_log("Invalid state. Got: $state, Expected: $stored_state");
+				Log::add("Invalid state. Got: $state, Expected: $stored_state");
 			}
 
 			if (!$retry_flag) {
@@ -569,7 +570,10 @@ class PlgSystemJbraSso extends CMSPlugin
 					$this->processUserSession($tokens);
 				}
 			} else {
-				if ($this->debug) error_log('No access token found');
+				if ($this->debug) {
+					error_log('No access token found');
+					Log::add('No access token found');
+				}
 				// No token available, require authorization
 				$app->enqueueMessage('No access token found. Please log in.', 'error');
 
