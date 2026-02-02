@@ -36,6 +36,7 @@
 				<field name="client_secret" type="password" label="Client Secret" />
 				<field name="logout_url" type="text" label="Logout URL" />
 				<field name="acceptable_domains" type="text" label="Acceptable Domains" />
+				<field name="default_joomla_group" type="number" label="Default Joomla Group ID" />
 				<field name="frontend_sso" type="checkbox" label="Enable SSO on frontend"
 					description="Click to enable sso on frontend. If it is not checked, use a button with link" />
 				<field name="admin_sso" type="checkbox" label="Enable SSO on admin"

@@ -46,6 +46,7 @@ class PlgSystemJbraSso extends CMSPlugin
 	private $client_secret;
 	private $logout_url;
 	private $acceptable_domains;
+	private $default_joomla_group;
 	private $frontend_sso;
 	private $admin_sso;
 	private $create_user;
@@ -67,6 +68,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		$this->client_secret = $this->params->get('client_secret', '');
 		$this->logout_url = $this->params->get('logout_url', '');
 		$this->acceptable_domains = $this->params->get('acceptable_domains', '');
+		$this->default_joomla_group = $this->params->get('default_joomla_group', 2);
 		$this->frontend_sso = $this->params->get('frontend_sso', false);
 		$this->admin_sso = $this->params->get('admin_sso', false);
 		$this->create_user = $this->params->get('create_user', false);
@@ -729,30 +731,35 @@ class PlgSystemJbraSso extends CMSPlugin
 		}
 
 		// Update data with wich we created the user
-		$db = Factory::getDbo();
-		$query = $db->getQuery(true);
+		$data = [
+			'name'     => $user_info['given_name'] . " " . $user_info['family_name'],
+			'username' => $user_info['preferred_username'],
+			'email'    => $user_info['email'],
+			//? Maybe we should set the openid groups here ...
+			'groups'   => array_unique(array_merge($user->groups, [$this->default_joomla_group])),
+			'lastvisitDate' => Factory::getDate()->toSql()
+		];
 
-		$query->update($db->quoteName('#__users'))
-			->set($db->quoteName('name') . ' = ' . $db->quote($user_info['surname'] . " " . $user_info['givenName']))
-			->set($db->quoteName('email') . ' = ' . $db->quote($user_info['email']))
-			->where($db->quoteName('username') . ' = ' . $db->quote($user_info['userPrincipalName']));
-
-		$db->setQuery($query);
-
-		try {
-			$db->execute();
-		} catch (\RuntimeException $e) {
-			$errorMessage = $e->getMessage();
-			error_log('Failed to update user data: ' . $errorMessage);
-			$app->enqueueMessage('Failed to update user data: ' . $errorMessage, 'error');
+		if (!$user->bind($data)) {
+			$app->enqueueMessage('Failed to bind updated user data: ' . $user->getError(), 'error');
 			Log::add(
-				'jbrasso: Failed to update user data: ' . $errorMessage,
+				'jbrasso: Failed to bind updated user data: ' . $user->getError(),
 				Log::DEBUG,
 				'jbrasso_log'
 			);
-			return false;
+			return;
 		}
-		$user = Factory::getUser($user->id);
+
+		if (!$user->save()) {
+			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
+			Log::add(
+				'jbrasso: Failed to update user data:' . $user->getError(),
+				Log::DEBUG,
+				'jbrasso_log'
+			);
+			return null;
+		}
+
 		return $user;
 	}
 
@@ -777,42 +784,35 @@ class PlgSystemJbraSso extends CMSPlugin
 
 
 		if (!empty($user_info)) {
-			$userObj = new \stdClass();
-			$userObj->name      = $user_info['surname'] . " " . $user_info['givenName'];
-			$userObj->username  = $user_info['userPrincipalName'];
-			$userObj->email     = $user_info['email'];
-			$userObj->password  = password_hash(UserHelper::genRandomPassword(12), PASSWORD_DEFAULT);
-			$userObj->registerDate = Factory::getDate()->toSql();
-			$userObj->params    = '{}';
+			$data = [
+				'name'     => $user_info['given_name'] . " " . $user_info['family_name'],
+				'username' => $user_info['preferred_username'],
+				'email'    => $user_info['email'],
+				'password_clear' => UserHelper::genRandomPassword(12),
+				'groups'   => [$this->default_joomla_group],
+				'lastvisitDate' => Factory::getDate()->toSql()
+			];
 
-
-
-
-
-			try {
-				$db->insertObject('#__users', $userObj);
-
-				$newUserId = $db->insertid();
-
-				$groupObj = new \stdClass();
-				$groupObj->user_id  = $newUserId;
-				$groupObj->group_id = 2;
-
-				$db->insertObject('#__user_usergroup_map', $groupObj);
-			} catch (\RuntimeException $e) {
-				$errorMessage = $e->getMessage();
-				error_log('Failed to create new user: ' . $errorMessage);
-				$app->enqueueMessage('Failed to create new user: ' . $errorMessage, 'error');
+			$user = new User();
+			if (!$user->bind($data)) {
+				$app->enqueueMessage('Failed to bind new user data: ' . $user->getError(), 'error');
 				Log::add(
-					'jbrasso: Failed to create new user: ' . $errorMessage,
+					'jbrasso: Failed to bind new user data: ' . $user->getError(),
 					Log::DEBUG,
 					'jbrasso_log'
 				);
-
-				// Fehlerbehandlung
-				return false;
+				return;
 			}
-			$user = Factory::getUser($newUserId);
+
+			if (!$user->save()) {
+				$app->enqueueMessage('Failed to create user account:' . $user->getError(), 'error');
+				Log::add(
+					'jbrasso: Failed to create user account:' . $user->getError(),
+					Log::DEBUG,
+					'jbrasso_log'
+				);
+				return;
+			}
 		} else {
 			$app->enqueueMessage('user_info not found.', 'error');
 			Log::add(
