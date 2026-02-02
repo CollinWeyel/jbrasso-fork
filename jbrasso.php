@@ -457,18 +457,30 @@ class PlgSystemJbraSso extends CMSPlugin
 		if ((empty($state) || empty($storedState) || $state !== $storedState)) {
 			if ($this->debug) {
 				error_log("Invalid state. Got: $state, Expected: $stored_state");
-				Log::add("Invalid state. Got: $state, Expected: $stored_state");
+				Log::add("Invalid state. Got: $state, Expected: $stored_state", Log::DEBUG, 'jbrasso_log');
 			}
 
 			if (!$retry_flag) {
+				if ($this->debug) {
+					error_log("Retry flag is set: $retry_flag");
+					Log::add("jbrasso: Retry flag is set: $retry_flag", Log::DEBUG, 'jbrasso_log');
+				}
 
 				$session->set("oauth2.retry.$client_key", true);
 
 				// Only retry with NON-EMPTY existing state
 				if (!empty($storedState)) {
+					if ($this->debug) {
+						error_log("Redirect with existing state");
+						Log::add("jbrasso: Redirect with existing state", Log::DEBUG, 'jbrasso_log');
+					}
 					$this->redirectForAuthorization($stored_state);
 				} else {
 					// No stored state = start clean
+					if ($this->debug) {
+						error_log("Redirect without existing state");
+						Log::add("jbrasso: Redirect without existing state", Log::DEBUG, 'jbrasso_log');
+					}
 					$this->redirectForAuthorization(null);
 				}
 
@@ -477,6 +489,7 @@ class PlgSystemJbraSso extends CMSPlugin
 
 			// If already retried once, stop and show error
 			$app->enqueueMessage('Invalid state parameter.', 'error');
+			Log::add("jbrasso: Redirect without existing state", Log::DEBUG, 'jbrasso_log');
 			return;
 		}
 
