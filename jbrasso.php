@@ -707,9 +707,9 @@ class PlgSystemJbraSso extends CMSPlugin
 		// $user->groups = [2]; //default group is registered
 
 		if (!$user->save()) {
-			$app->enqueueMessage('Failed to create user account.', 'error');
+			$app->enqueueMessage('Failed to update user data.', 'error');
 			Log::add(
-				'jbrasso: Failed to create user account.',
+				'jbrasso: Failed to update user data.',
 				Log::DEBUG,
 				'jbrasso_log'
 			);
@@ -737,6 +737,7 @@ class PlgSystemJbraSso extends CMSPlugin
 			$app->enqueueMessage('The option to create new user account is disabled. If you want access inform the IT.', 'error');
 			return;
 		}
+
 
 		if (!empty($user_info)) {
 			// If user doesn't exist, create a new Joomla user
