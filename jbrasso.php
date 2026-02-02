@@ -454,7 +454,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		}
 
 		// Validate state parameter
-		if ((empty($state) || empty($storedState) || $state !== $storedState)) {
+		if ((empty($state) || empty($storedState) || strcmp($state, $storedState) !== 0)) {
 			if ($this->debug) {
 				error_log("Invalid state. Got: $state, Expected: $stored_state");
 				Log::add("Invalid state. Got: $state, Expected: $stored_state", Log::DEBUG, 'jbrasso_log');
