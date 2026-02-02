@@ -716,12 +716,24 @@ class PlgSystemJbraSso extends CMSPlugin
 		}
 
 		// Update data with wich we created the user
-		$user->setParam('email', $user_info['email']);
-		$user->setParam('name', $user_info['surname'] . " " . $user_info['givenName']);
-		$user->setParam('username', $user_info['userPrincipalName']);
-		$user->setParam('lastvisitDate', date("Y-m-d H:i:s"));
-		//? Maybe we should set the openid groups here ...
-		// $user->setParam('groups', [2]); //default group is registered
+		$data = [
+			'name'     => $user_info['surname'] . " " . $user_info['givenName'],
+			'username' => $user_info['userPrincipalName'],
+			'email'    => $user_info['email'],
+			//? Maybe we should set the openid groups here ...
+			// 'groups'   => [2],
+			'lastvisitDate' => Factory::getDate()->toSql()
+		];
+
+		if (!$user->bind($data)) {
+			$app->enqueueMessage('Failed to bind updated user data: ' . $user->getError(), 'error');
+			Log::add(
+				'jbrasso: Failed to bind updated user data: ' . $user->getError(),
+				Log::DEBUG,
+				'jbrasso_log'
+			);
+			return;
+		}
 
 		if (!$user->save()) {
 			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
@@ -732,7 +744,6 @@ class PlgSystemJbraSso extends CMSPlugin
 			);
 			return null;
 		}
-
 
 		return $user;
 	}
@@ -758,13 +769,25 @@ class PlgSystemJbraSso extends CMSPlugin
 
 		if (!empty($user_info)) {
 			// If user doesn't exist, create a new Joomla user
+			$data = [
+				'name'     => $user_info['surname'] . " " . $user_info['givenName'],
+				'username' => $user_info['userPrincipalName'],
+				'email'    => $user_info['email'],
+				'password_clear' => UserHelper::genRandomPassword(12),
+				'groups'   => [2],
+				'lastvisitDate' => Factory::getDate()->toSql()
+			];
+
 			$user = new User();
-			$user->setParam('email', $user_info['email']);
-			$user->setParam('name', $user_info['surname'] . " " . $user_info['givenName']);
-			$user->setParam('username', $user_info['userPrincipalName']);
-			$user->setParam('lastvisitDate', date("Y-m-d H:i:s"));
-			$user->setParam('groups', [2]); //default group is registered
-			$user->setParam('password_clear', UserHelper::genRandomPassword(12)); // Temporary random password
+			if (!$user->bind($data)) {
+				$app->enqueueMessage('Failed to bind new user data: ' . $user->getError(), 'error');
+				Log::add(
+					'jbrasso: Failed to bind new user data: ' . $user->getError(),
+					Log::DEBUG,
+					'jbrasso_log'
+				);
+				return;
+			}
 
 			if (!$user->save()) {
 				$app->enqueueMessage('Failed to create user account:' . $user->getError(), 'error');
