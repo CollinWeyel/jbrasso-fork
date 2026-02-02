@@ -752,7 +752,7 @@ class PlgSystemJbraSso extends CMSPlugin
 			);
 			return false;
 		}
-
+		$user = Factory::getUser($user->id);
 		return $user;
 	}
 
