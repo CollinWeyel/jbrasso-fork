@@ -699,17 +699,17 @@ class PlgSystemJbraSso extends CMSPlugin
 		}
 
 		// Update data with wich we created the user
-		$user->email = $user_info['email'];
-		$user->name = $user_info['surname'] . " " . $user_info['givenName'];
-		$user->username = $user_info['userPrincipalName'];
-		$user->lastvisitDate = date("Y-m-d H:i:s");
+		$user->setParam('email', $user_info['email']);
+		$user->setParam('name', $user_info['surname'] . " " . $user_info['givenName']);
+		$user->setParam('username', $user_info['userPrincipalName']);
+		$user->setParam('lastvisitDate', date("Y-m-d H:i:s"));
 		//? Maybe we should set the openid groups here ...
-		// $user->groups = [2]; //default group is registered
+		// $user->setParam('groups', [2]); //default group is registered
 
 		if (!$user->save()) {
-			$app->enqueueMessage('Failed to update user data.', 'error');
+			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
 			Log::add(
-				'jbrasso: Failed to update user data.',
+				'jbrasso: Failed to update user data:' . $user->getError(),
 				Log::DEBUG,
 				'jbrasso_log'
 			);
