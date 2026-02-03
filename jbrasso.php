@@ -754,10 +754,16 @@ class PlgSystemJbraSso extends CMSPlugin
 		$groups = $user->groups;
 		$groups[] = $this->default_joomla_group;
 
+		$superAdminGroups = [];
+
 		if (!empty($user_info[$this->groups_attribute])) {
 			foreach ($this->oauth2_group_mappings as $mapping) {
 				if (in_array($mapping->oauth2_group, $user_info[$this->groups_attribute])) {
-					$groups[] = $mapping->joomla_group;
+					if ($this->isSuperAdminGroup($mapping->joomla_group)) {
+						$superAdminGroups[] = $mapping->joomla_group;
+					} else {
+						$groups[] = $mapping->joomla_group;
+					}
 				}
 			}
 		}
@@ -783,8 +789,6 @@ class PlgSystemJbraSso extends CMSPlugin
 			return;
 		}
 
-		// To be able to grant superuser privileges
-		$user->set('isRoot', true);
 		if (!$user->save()) {
 			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
 			Log::add(
@@ -794,7 +798,9 @@ class PlgSystemJbraSso extends CMSPlugin
 			);
 			return null;
 		}
-		$user->set('isRoot', false);
+
+		// grant super admin groups after user creation
+		$user = $this->grantSuperAdminGroups($user, $superAdminGroups);
 
 		return $user;
 	}
@@ -823,10 +829,16 @@ class PlgSystemJbraSso extends CMSPlugin
 			$groups = [];
 			$groups[] = $this->default_joomla_group;
 
+			$superAdminGroups = [];
+
 			if (!empty($user_info[$this->groups_attribute])) {
 				foreach ($this->oauth2_group_mappings as $mapping) {
 					if (in_array($mapping->oauth2_group, $user_info[$this->groups_attribute])) {
-						$groups[] = $mapping->joomla_group;
+						if ($this->isSuperAdminGroup($mapping->joomla_group)) {
+							$superAdminGroups[] = $mapping->joomla_group;
+						} else {
+							$groups[] = $mapping->joomla_group;
+						}
 					}
 				}
 			}
@@ -844,8 +856,6 @@ class PlgSystemJbraSso extends CMSPlugin
 			];
 
 			$user = new User();
-			// To be able to grant superuser privileges
-			$user->set('isRoot', true);
 			if (!$user->bind($data)) {
 				$app->enqueueMessage('Failed to bind new user data: ' . $user->getError(), 'error');
 				Log::add(
@@ -865,7 +875,9 @@ class PlgSystemJbraSso extends CMSPlugin
 				);
 				return;
 			}
-			$user->set('isRoot', false);
+
+			// grant super admin groups after user creation
+			$user = $this->grantSuperAdminGroups($user, $superAdminGroups);
 		} else {
 			$app->enqueueMessage('user_info not found.', 'error');
 			Log::add(
@@ -1519,5 +1531,68 @@ CREATE TABLE
   );
 SQL));
 		$db->execute();
+	}
+
+	protected function isSuperAdminGroup($groupId)
+	{
+		$asset = \Joomla\CMS\Access\Access::getAssetRules('root.1');
+
+		return $asset->allow('core.admin', (int) $groupId) === true;
+	}
+
+	protected function grantSuperAdminGroups($user, $groups)
+	{
+		$db = Factory::getDbo();
+
+		foreach ($groups as $group) {
+			// check if user was already granted the group
+			$query = $db->getQuery(true)
+				->select('COUNT(*)')
+				->from($db->quoteName('#__user_usergroup_map'))
+				->where($db->quoteName('user_id') . ' = ' . $user->id)
+				->where($db->quoteName('group_id') . ' = ' . $group);
+
+			$db->setQuery($query);
+			$alreadyInGroup = (bool) $db->loadResult();
+
+			if (!$alreadyInGroup) {
+				if ($this->debug) {
+					error_log('Granting group ' . $group . ' to user ' . $user->username);
+					Log::add(
+						'jbrasso: Granting group ' . $group . ' to user ' . $user->username,
+						Log::DEBUG,
+						'jbrasso_log'
+					);
+				}
+
+				$query->clear()
+					->insert($db->quoteName('#__user_usergroup_map'))
+					->columns([$db->quoteName('user_id'), $db->quoteName('group_id')])
+					->values($user->id . ', ' . $group);
+
+				$db->setQuery($query);
+
+				try {
+					$db->execute();
+				} catch (\Exception $e) {
+					error_log('Error granting new super admin group to user: ' . $e->getMessage());
+					Log::add(
+						'jbrasso: Error granting new super admin group to user: ' . $e->getMessage(),
+						Log::DEBUG,
+						'jbrasso_log'
+					);
+
+					return false;
+				}
+			}
+		}
+
+		// update user objects with new permissions
+		$user->getAuthorisedGroups();
+		if (method_exists($user, 'reconfirmSession')) {
+			$user->reconfirmSession();
+		}
+
+		return $user;
 	}
 }
