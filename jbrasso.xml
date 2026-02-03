@@ -69,20 +69,22 @@
 					label="OAuth2 Family Name Attribute" />
 				<field name="email_attribute" type="text" default="email"
 					label="OAuth2 E-Mail Attribute" />
+				<field name="groups_attribute" type="text" default="groups"
+					label="OAuth2 Roles Attribute" />
 				<field
-					name="oauth2_role_mappings"
+					name="oauth2_group_mappings"
 					type="subform"
 					label="OAuth2 Role Mappings"
-					description="Map OAuth2 roles to Joomla! groups"
+					description="Map OAuth2 Groups to Joomla! Groups"
 					multiple="true"
 					min="1"
 					layout="joomla.form.field.subform.repeatable-table"
 				>
 					<form>
 						<field
-							name="oauth2_role"
+							name="oauth2_group"
 							type="text"
-							label="OAuth2 Role"
+							label="OAuth2 Group"
 							placeholder="joomla-admin"
 							required="true"
 						/>

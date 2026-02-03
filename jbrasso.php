@@ -47,6 +47,7 @@ class PlgSystemJbraSso extends CMSPlugin
 	private $client_secret;
 	private $logout_url;
 	private $acceptable_domains;
+	private $default_joomla_group;
 	// Switches
 	private $frontend_sso;
 	private $admin_sso;
@@ -58,8 +59,8 @@ class PlgSystemJbraSso extends CMSPlugin
 	private $given_name_attribute;
 	private $family_name_attribute;
 	private $email_attribute;
-	private $default_joomla_group;
-	private $oauth2_role_mappings;
+	private $groups_attribute;
+	private $oauth2_group_mappings;
 
 	// Calculated
 	private $redirect_uri;
@@ -79,6 +80,7 @@ class PlgSystemJbraSso extends CMSPlugin
 		$this->client_secret = $this->params->get('client_secret', '');
 		$this->logout_url = $this->params->get('logout_url', '');
 		$this->acceptable_domains = $this->params->get('acceptable_domains', '');
+		$this->default_joomla_group = $this->params->get('default_joomla_group', 2);
 		// Switches
 		$this->frontend_sso = $this->params->get('frontend_sso', false);
 		$this->admin_sso = $this->params->get('admin_sso', false);
@@ -90,8 +92,8 @@ class PlgSystemJbraSso extends CMSPlugin
 		$this->given_name_attribute = $this->params->get('given_name_attribute', '');
 		$this->family_name_attribute = $this->params->get('family_name_attribute', '');
 		$this->email_attribute = $this->params->get('email_attribute', '');
-		$this->default_joomla_group = $this->params->get('default_joomla_group', 2);
-		$this->oauth2_role_mappings = $this->params->get('oauth2_role_mappings', []);
+		$this->groups_attribute = $this->params->get('groups_attribute', '');
+		$this->oauth2_group_mappings = $this->params->get('oauth2_group_mappings', []);
 
 		if (Factory::getApplication()->isClient('administrator')) {
 			// Redirect URI for the administrator context
@@ -752,9 +754,11 @@ class PlgSystemJbraSso extends CMSPlugin
 		$groups = $user->groups;
 		$groups[] = $this->default_joomla_group;
 
-		foreach ($this->oauth2_role_mappings as $mapping) {
-			if (in_array($mapping->oauth2_role, $user_info['roles'])) {
-				$groups[] = $mapping->joomla_group;
+		if (!empty($user_info[$this->groups_attribute])) {
+			foreach ($this->oauth2_group_mappings as $mapping) {
+				if (in_array($mapping->oauth2_group, $user_info[$this->groups_attribute])) {
+					$groups[] = $mapping->joomla_group;
+				}
 			}
 		}
 
@@ -816,9 +820,11 @@ class PlgSystemJbraSso extends CMSPlugin
 			$groups = [];
 			$groups[] = $this->default_joomla_group;
 
-			foreach ($this->oauth2_role_mappings as $mapping) {
-				if (in_array($mapping->oauth2_role, $user_info['roles'])) {
-					$groups[] = $mapping->joomla_group;
+			if (!empty($user_info[$this->groups_attribute])) {
+				foreach ($this->oauth2_group_mappings as $mapping) {
+					if (in_array($mapping->oauth2_group, $user_info[$this->groups_attribute])) {
+						$groups[] = $mapping->joomla_group;
+					}
 				}
 			}
 
