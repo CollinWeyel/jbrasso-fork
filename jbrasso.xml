@@ -36,7 +36,16 @@
 				<field name="client_secret" type="password" label="Client Secret" />
 				<field name="logout_url" type="text" label="Logout URL" />
 				<field name="acceptable_domains" type="text" label="Acceptable E-Mail Domains" />
-				<field name="default_joomla_group" type="number" label="Default Joomla Group ID" />
+				<field
+					name="default_joomla_group"
+					type="usergroups"
+					label="Default User Group"
+					description="This group will be assigned to each user."
+					multiple="false"
+					checksuperuser="true"
+				>
+					<option value="">-- select --</option>
+				</field>
 
 				<field name="spacer1" type="spacer" hr="true" />
 
@@ -59,16 +68,6 @@
 					label="OAuth2 Family Name Attribute" />
 				<field name="email_attribute" type="text" default="email"
 					label="OAuth2 E-Mail Attribute" />
-				<field
-					name="default_joomla_group"
-					type="usergroups"
-					label="Default User Group"
-					description="This group will be assigned to each user."
-					multiple="false"
-					checksuperuser="true"
-				>
-					<option value="">-- select --</option>
-				</field>
 				<field
 					name="oauth2_role_mappings"
 					type="subform"
