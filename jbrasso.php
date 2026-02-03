@@ -783,6 +783,8 @@ class PlgSystemJbraSso extends CMSPlugin
 			return;
 		}
 
+		// To be able to grant superuser privileges
+		$user->set('isRoot', true);
 		if (!$user->save()) {
 			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
 			Log::add(
@@ -792,6 +794,7 @@ class PlgSystemJbraSso extends CMSPlugin
 			);
 			return null;
 		}
+		$user->set('isRoot', false);
 
 		return $user;
 	}
@@ -841,6 +844,8 @@ class PlgSystemJbraSso extends CMSPlugin
 			];
 
 			$user = new User();
+			// To be able to grant superuser privileges
+			$user->set('isRoot', true);
 			if (!$user->bind($data)) {
 				$app->enqueueMessage('Failed to bind new user data: ' . $user->getError(), 'error');
 				Log::add(
@@ -860,6 +865,7 @@ class PlgSystemJbraSso extends CMSPlugin
 				);
 				return;
 			}
+			$user->set('isRoot', false);
 		} else {
 			$app->enqueueMessage('user_info not found.', 'error');
 			Log::add(
