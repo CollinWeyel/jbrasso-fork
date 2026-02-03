@@ -38,11 +38,12 @@
 				<field name="acceptable_domains" type="text" label="Acceptable E-Mail Domains" />
 				<field
 					name="default_joomla_group"
-					type="usergroups"
+					type="usergrouplist"
 					label="Default User Group"
 					description="This group will be assigned to each user."
 					multiple="false"
 					checksuperuser="true"
+					layout="joomla.form.field.list-fancy-select"
 				>
 					<option value="">-- select --</option>
 				</field>
@@ -87,9 +88,10 @@
 						/>
 						<field
 							name="joomla_group"
-							type="usergroups"
+							type="usergrouplist"
 							label="Usergroup"
 							required="true"
+							layout="joomla.form.field.list-fancy-select"
 						>
 							<option value="">-- select --</option>
 						</field>
