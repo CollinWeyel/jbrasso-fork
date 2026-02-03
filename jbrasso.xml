@@ -7,7 +7,7 @@
 	<license>GNU Lesser General Public License v3.0 (LGPL-3.0); see LICENSE.md</license>
 	<authorEmail>jbrailas@rns-systems.eu,collin@weyel.dev</authorEmail>
 	<version>1.6</version>
-	<buildDate>Mo 2. Feb 10:32:10 CET 2026</buildDate>
+	<buildDate>Di 3. Feb 10:19:15 CET 2026</buildDate>
 	<description>Oauth SSO Joomla 5 Plugin</description>
 	<files>
 		<filename plugin="jbrasso">jbrasso.php</filename>
@@ -26,7 +26,7 @@
 	</uninstall>
 	<config>
 		<fields name="params">
-			<fieldset name="basic">
+			<fieldset name="basic" label="Configuration">
 				<field name="app_name" type="text" label="App Name" />
 				<field name="app_scope" type="text" default="openid profile email" label="OIDC Scope" />
 				<field name="auth_url" type="text" label="Authorization URL" />
@@ -35,8 +35,11 @@
 				<field name="client_id" type="text" label="Client ID" />
 				<field name="client_secret" type="password" label="Client Secret" />
 				<field name="logout_url" type="text" label="Logout URL" />
-				<field name="acceptable_domains" type="text" label="Acceptable Domains" />
+				<field name="acceptable_domains" type="text" label="Acceptable E-Mail Domains" />
 				<field name="default_joomla_group" type="number" label="Default Joomla Group ID" />
+
+				<field name="spacer1" type="spacer" hr="true" />
+
 				<field name="frontend_sso" type="checkbox" label="Enable SSO on frontend"
 					description="Click to enable sso on frontend. If it is not checked, use a button with link" />
 				<field name="admin_sso" type="checkbox" label="Enable SSO on admin"
@@ -45,6 +48,54 @@
 					description="Click to enable to auto-create users. Deny access if user not found." />
 				<field name="debug" type="checkbox" label="Enable Debug"
 					description="Click to enable php errorlog debug" />
+			</fieldset>
+
+			<fieldset name="mappings" label="OAuth2 Mappings">
+				<field name="username_attribute" type="text" default="preferred_username"
+					label="OAuth2 Username Attribute" />
+				<field name="given_name_attribute" type="text" default="given_name"
+					label="OAuth2 Given Name Attribute" />
+				<field name="family_name_attribute" type="text" default="family_name"
+					label="OAuth2 Family Name Attribute" />
+				<field name="email_attribute" type="text" default="email"
+					label="OAuth2 E-Mail Attribute" />
+				<field
+					name="default_joomla_group"
+					type="usergroups"
+					label="Default User Group"
+					description="This group will be assigned to each user."
+					multiple="false"
+					checksuperuser="true"
+				>
+					<option value="">-- select --</option>
+				</field>
+				<field
+					name="oauth2_role_mappings"
+					type="subform"
+					label="OAuth2 Role Mappings"
+					description="Map OAuth2 roles to Joomla! groups"
+					multiple="true"
+					min="1"
+					layout="joomla.form.field.subform.repeatable-table"
+				>
+					<form>
+						<field
+							name="oauth2_role"
+							type="text"
+							label="OAuth2 Role"
+							placeholder="joomla-admin"
+							required="true"
+						/>
+						<field
+							name="joomla_group"
+							type="usergroups"
+							label="Usergroup"
+							required="true"
+						>
+							<option value="">-- select --</option>
+						</field>
+					</form>
+				</field>
 			</fieldset>
 		</fields>
 	</config>
