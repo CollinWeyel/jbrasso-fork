@@ -729,6 +729,7 @@ class PlgSystemJbraSso extends CMSPlugin
 	private function updateUser($user, $user_info)
 	{
 		$app = Factory::getApplication();
+		$db = Factory::getDbo();
 		if ($this->debug) {
 			error_log('updateUser executed\n');
 			Log::add(
@@ -751,6 +752,9 @@ class PlgSystemJbraSso extends CMSPlugin
 			return $user;
 		}
 
+		$name  = trim($user_info[$this->given_name_attribute] . " " . $user_info[$this->family_name_attribute]);
+		$email = $user_info[$this->email_attribute];
+
 		$groups = $user->groups;
 		$groups[] = $this->default_joomla_group;
 
@@ -771,32 +775,28 @@ class PlgSystemJbraSso extends CMSPlugin
 		$groups = array_unique($groups);
 
 		// Update data with wich we created the user
-		$data = [
-			'name'     => $user_info[$this->given_name_attribute] . " " . $user_info[$this->family_name_attribute],
-			'username' => $user_info[$this->username_attribute],
-			'email'    => $user_info[$this->email_attribute],
-			'groups'   => $groups,
-			'lastvisitDate' => Factory::getDate()->toSql()
-		];
+		$query = $db->getQuery(true)
+			->update($db->quoteName('#__users'))
+			->set($db->quoteName('name') . ' = :name')
+			->set($db->quoteName('email') . ' = :email')
+			->set($db->quoteName('lastvisitDate') . ' = :lastvisitDate')
+			->where($db->quoteName('id') . ' = :id')
+			->bind(':name', $name)
+			->bind(':email', $email)
+			->bind(':lastvisitDate', Factory::getDate()->toSql())
+			->bind(':id', $user->id);
 
-		if (!$user->bind($data)) {
-			$app->enqueueMessage('Failed to bind updated user data: ' . $user->getError(), 'error');
-			Log::add(
-				'jbrasso: Failed to bind updated user data: ' . $user->getError(),
-				Log::DEBUG,
-				'jbrasso_log'
-			);
-			return;
-		}
-
-		if (!$user->save()) {
-			$app->enqueueMessage('Failed to update user data:' . $user->getError(), 'error');
-			Log::add(
-				'jbrasso: Failed to update user data:' . $user->getError(),
-				Log::DEBUG,
-				'jbrasso_log'
-			);
-			return null;
+		try {
+			$db->setQuery($query)->execute();
+		} catch (\Exception $e) {
+			if ($this->debug) {
+				error_log('Failed to update user data with sql: ' . $e->getMessage());
+				Log::add(
+					'jbrasso: Failed to update user data with sql:' . $user->getError(),
+					Log::DEBUG,
+					'jbrasso_log'
+				);
+			}
 		}
 
 		// grant super admin groups after user creation
@@ -1128,21 +1128,17 @@ class PlgSystemJbraSso extends CMSPlugin
 
 		// Query the user by email
 		$query = $db->getQuery(true)
-			->select('*')
+			->select('id')
 			->from($db->quoteName('#__users'))
-			->where($db->quoteName('email') . ' = ' . $db->quote($email));
+			->where($db->quoteName('email') . ' = :email')
+			->bind(':email', $email);
 		$db->setQuery($query);
 
 		// Load the result
-		$userData = $db->loadAssoc();
+		$userId = $db->loadResult();
 
-		if ($userData) {
-			$userData["params"] = array();
-
-			// Load the user object
-			$user = new User();
-			$user->bind($userData);
-			return $user;
+		if ($userId) {
+			return Factory::getUser((int) $userId);
 		}
 
 		return null; // User not found
@@ -1546,11 +1542,18 @@ SQL));
 
 		foreach ($groups as $group) {
 			// check if user was already granted the group
+			$query = $db->createQuery();
+			$where = array(
+				$db->quoteName('user_id') . ' = :user_id',
+				$db->quoteName('group_id') . ' = :group_id'
+			);
 			$query = $db->getQuery(true)
 				->select('COUNT(*)')
 				->from($db->quoteName('#__user_usergroup_map'))
 				->where($db->quoteName('user_id') . ' = ' . $user->id)
-				->where($db->quoteName('group_id') . ' = ' . $group);
+				->where($where)
+				->bind(':user_id', $user->id)
+				->bind(':group_id', $group);
 
 			$db->setQuery($query);
 			$alreadyInGroup = (bool) $db->loadResult();
@@ -1568,7 +1571,9 @@ SQL));
 				$query->clear()
 					->insert($db->quoteName('#__user_usergroup_map'))
 					->columns([$db->quoteName('user_id'), $db->quoteName('group_id')])
-					->values($user->id . ', ' . $group);
+					->values(':user_id, :group_id')
+					->bind(':user_id', $user->id)
+					->bind(':group_id', $group);
 
 				$db->setQuery($query);
 
